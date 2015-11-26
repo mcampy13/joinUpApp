@@ -9,6 +9,10 @@ body h3 {
     color: #ffffff;
 }
 
+#createAccBanner{
+    text-align: center;
+}
+
 .form-signin {
     max-width: 330px;
     padding: 15px;
