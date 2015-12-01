@@ -130,6 +130,11 @@ app.get('/dashboard', function(req, res) {
     res.render('dashboard', {userId: " ", username: " ", email: " "});
 });
 
+//renders game homepage where Users can start a game (Will require further attention)
+app.get('/gameHome', function(req, res){
+    res.render('gameHome');
+});
+
 
 // Routes for all users, where admin can edit contents
 app.get('/users', function(req, res) {

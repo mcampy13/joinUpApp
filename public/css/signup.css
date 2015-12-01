@@ -1,7 +1,7 @@
 body {
     padding-top: 40px;
     padding-bottom: 40px;
-    background-color: #000000;
+    background-color: #f4801f;
 }
 
 body h3 {
@@ -10,7 +10,10 @@ body h3 {
 }
 
 #createAccBanner{
-    text-align: center;
+  margin-left:auto;
+  margin-right:auto;
+  clear:both;
+  display:block;
 }
 
 .form-signin {
@@ -50,4 +53,9 @@ body h3 {
     margin-bottom: 10px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
+}
+
+#signIn{
+    font-size:20px;
+    font-weight: 500;
 }
