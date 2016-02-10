@@ -5,14 +5,13 @@ Parse.initialize("mg1qP8MFKOVjykmN3Aha6Q47L6XtuNQLIyVKFutU", "jbAhu3Txusmh2fpHCB
  //Mailgun.initialize('sandbox11783fbada334d4a825cde853cce3717.mailgun.org', 'key-0aeded91185230fc8a83b13b4936fd3b');
  app = express();
 
-var loggedIn;
-
 // Global app configuration section
 app.set('views', 'cloud/views');  // Specify the folder to find templates
 app.set('view engine', 'ejs');    // Set the template engine
 app.use(express.bodyParser());    // Middleware for reading request body
 app.use(express.methodOverride()); // Middleware for receiving HTTP delete & put
 //app.use(Mailgun);
+
 
 app.get('/api/category/categoryName', function(req, res) {
     var Categories = Parse.Object.extend('Category');
@@ -31,6 +30,40 @@ app.get('/api/category/categoryName', function(req, res) {
     });
 });
 
+//GET print data page
+app.get('/print',function(req,res){
+    console.log('GET request made to print page');
+    res.render('print');
+});
+
+//Post request from print
+app.post('/print',function(req,res,next){
+    console.log('Print POST request made');
+    Users = Parse.Object.extend('User');
+    var query2 = new Parse.Query(Users);
+    console.log('query about to begin');
+    query2.find({
+      success: function(results2) {
+        // cycle through the results
+        console.log('success in entering query');
+        for ( x in results2 ) {
+            // print out the usernames and email addresses
+            console.log( 'Username: ' + results2[x].attributes.username + '\r\n ' + 'Email: ' + results2[x].attributes.email + '\r\n' );
+            
+        }
+        res.render('print');
+      },
+      error: function(error) {
+        // Error occured
+        console.log('error in entering query');
+        console.log( error );
+        res.render('print');
+      }
+    });
+    
+})
+
+
 // GET, render signUp page
 app.get('/signup', function(req, res) {
     res.render('signup');
@@ -45,6 +78,8 @@ app.post('/signup', function(req, res) {
     var sex = req.body.sex;
     var email = req.body.email;
     var phone = req.body.phone;
+    
+    //Creates new instance of parse User
     var user = new Parse.User();
 
     user.set('username', username);
@@ -61,7 +96,6 @@ app.post('/signup', function(req, res) {
         res.render('signup', { flash: error.message });
     });
 });
-
 
 // GET, render login page
 app.get('/login', function(req, res) {
@@ -82,8 +116,7 @@ app.post('/login', function(req, res) {
         roleACL.setPublicReadAccess(false);
         var myACL_publicRead = roleACL.getPublicReadAccess();
         var myACL_publicWrite = roleACL.getPublicWriteAccess();
-       
-
+        //
         //var me = Parse.User.become(seshToString).then(function(me) {
         //    res.send("<head><script src='//www.parsecdn.com/js/parse-1.5.0.min.js'></script></head>" +
         //        "<body>" +
@@ -102,106 +135,87 @@ app.post('/login', function(req, res) {
     }, function(error) {
         res.redirect('/');
     });
-  
-    
-});
-
-//Routes for pleaseSignIn error page
-app.get('/pleaseSignIn', function(req,res) {
-    res.render('pleaseSignIn');
 });
 
 
+// GET, renders dashboard (the main focal point)
+app.get('/dashboard', function(req, res) {
+    res.render('dashboard', {userId: " ", username: " ", email: " "});
+});
 
-//Verifies that the page request is from a logged in user
-if (true) {
+
+// Routes for all users, where admin can edit contents
+app.get('/users', function(req, res) {
+    res.render('users', {userId: " ", email: " "});
+});
 
 
-    // GET, renders dashboard (the main focal point)
-    app.get('/dashboard', function(req, res) {
-        res.render('dashboard', {userId: " ", username: " ", email: " "});
-    });
-    
-    
-    //renders game homepage where Users can start a game (Will require further attention)
-    app.get('/gameHome', function(req, res){
-        res.render('gameHome');
-    });
-    
-    
-    // Routes for all users, where admin can edit contents
-    app.get('/users', function(req, res) {
-        res.render('users', {userId: " ", email: " "});
-    });
-    
-    
-    // Routes for badges, where admin can edit contents
-    app.get('/badges', function(req, res) {
-        res.render('badges', {badgeId: " ", username: " "});
-    });
-    
-    
-    // Routes for adding categories
-    app.get('/addCategory', function(req, res) {
-        res.render('addCategory', {categoryID: " ", categoryName: " ", createdAt: " ", createdBy: " "});
-    });
-    app.post('/addCategory', function(req, res) {
-        res.render('addCategory');
-    });
-    
-    
-    // Routes for adding sub-categories
-    app.get('/addSubCategory', function(req, res) {
-        res.render('addSubCategory', {subCategoryId: " ", subCategoryName: " ", createdAt: " "});
-    });
-    app.post('/addSubCategory', function(req, res) {
-        res.render('addSubCategory');
-    });
-    
-    // Routes for adding questions
-    app.get('/addQuestion', function(req, res) {
-        res.render('addQuestion', {questionId: " ", questionName: " "});
-    });
-    app.post('/addQuestion', function(req, res) {
-        res.render('addQuestion');
-    });
-    
-    
-    // Load Settings view
-    app.get('/settings', function(req, res) {
-        res.render('settings');
-    });
-    app.post('/settings', function(req, res) {
-        res.render('settings');
-    });
-    
-    
-    // Load User Profile page, our Custom Hub
-    app.get('/profile', function(req, res) {
-       res.render('profile', {userId: " ", username: " "});
-    });
-    app.post('/profile', function(req, res) {
-        res.render('profile');
-    });
-    
-    
-    // Routes for user logout
-    app.get('/logout', function(req, res) {
-        Parse.User.logOut();
-        res.redirect('/');
-    });
-    app.post('/logout', function(req, res) {
-        Parse.User.logOut();
-        res.redirect('/');
-    });
-}
+//Routes for game homepage
+app.get('/gameHome', function(req, res) {
+    res.render('gameHome', {});
+});
 
-//redirects traffic to login page if they are not signed in
-else{
-     app.get('*', function(req, res) {
-        res.redirect('/pleaseSignIn');
-    });
-}
+
+// Routes for badges, where admin can edit contents
+app.get('/badges', function(req, res) {
+    res.render('badges', {badgeId: " ", username: " "});
+});
+
+
+// Routes for adding categories
+app.get('/addCategory', function(req, res) {
+    res.render('addCategory', {categoryID: " ", categoryName: " ", createdAt: " ", createdBy: " "});
+});
+app.post('/addCategory', function(req, res) {
+    res.render('addCategory');
+});
+
+
+// Routes for adding sub-categories
+app.get('/addSubCategory', function(req, res) {
+    res.render('addSubCategory', {subCategoryId: " ", subCategoryName: " ", createdAt: " "});
+});
+app.post('/addSubCategory', function(req, res) {
+    res.render('addSubCategory');
+});
+
+// Routes for adding questions
+app.get('/addQuestion', function(req, res) {
+    res.render('addQuestion', {questionId: " ", questionName: " "});
+});
+app.post('/addQuestion', function(req, res) {
+    res.render('addQuestion');
+});
+
+
+// Load Settings view
+app.get('/settings', function(req, res) {
+    res.render('settings');
+});
+app.post('/settings', function(req, res) {
+    res.render('settings');
+});
+
+
+// Load User Profile page, our Custom Hub
+app.get('/profile', function(req, res) {
+   res.render('profile', {userId: " ", username: " "});
+});
+app.post('/profile', function(req, res) {
+    res.render('profile');
+});
+
+
+// Routes for user logout
+app.get('/logout', function(req, res) {
+    Parse.User.logOut();
+    res.redirect('/');
+});
+app.post('/logout', function(req, res) {
+    Parse.User.logOut();
+    res.redirect('/');
+});
+
 
 // Attach the Express app to Cloud Code.
-app.listen(3000);
+app.listen();
